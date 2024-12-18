@@ -59,10 +59,10 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - script: |
-        docker pull owasp/zap2docker-stable
+        docker pull owasp/zap2docker-weekly
         docker run --rm -v $(System.DefaultWorkingDirectory):/zap/wrk \
-        owasp/zap2docker-stable zap-baseline.py \
-        -t http://TestEnvURL -r zap_report.html
+        owasp/zap2docker-weekly zap-baseline.py \
+        -t http://localhost:8000 -r zap_report.html
       displayName: 'Run OWASP ZAP Scan'
 
     # Publish OWASP ZAP Report
@@ -79,7 +79,7 @@ stages:
     steps:
     - script: |
         curl -sL https://aka.ms/security-devops-setup | bash
-        msdevops scan --include-tools sast,credscan || echo "Security scan failed"
+        msdevops scan --include-tools sast,credscan --output-dir security-results || echo "Security scan failed"
       displayName: 'Run Microsoft Security DevOps'
 
     # Publish Microsoft Security Report
