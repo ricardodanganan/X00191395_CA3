@@ -14,7 +14,18 @@ To meet submission requirements for CA3, the following steps were taken to creat
 - The repository was cloned locally to `C:/College - DevOps_Projects/X00191395_CA3`.
 
 #### Screenshots:
-1. GitHub repository creation.
-2. Confirmation of adding the lecturer as a collaborator.
-3. Terminal output showing successful cloning.
+![GitHub Repository Screenshot](images/Github-repo-page.jpg)
 
+## Azure DevOps Project Setup
+
+To meet submission requirements, the Azure DevOps project was created and configured as follows:
+
+### Project Creation
+- A new Azure DevOps project named `X00191395_CA3` was created.
+- The project visibility was set to **Private**.
+
+### Adding Project Administrator
+- The lecturer, Mr. Damian Niezgoda, was added as a Project Administrator.
+
+#### Screenshots:
+![Azure DevOps Project Screenshot](images/Azure-creation-page.jpg)
