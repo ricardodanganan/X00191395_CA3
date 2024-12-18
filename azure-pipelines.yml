@@ -24,6 +24,13 @@ stages:
         python -m unittest test_todo.py
       displayName: 'Run Unit Tests'
 
+    # Publish Artifacts
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.SourcesDirectory)'
+        ArtifactName: 'ToDoApp-Build'
+      displayName: 'Publish Build Artifacts'
+
 # Deploy to Test Environment
 - stage: DeployToTest
   displayName: 'Deploy to Test Environment'
@@ -40,7 +47,7 @@ stages:
           - script: echo "Deploying To-Do List App to Test Environment"
             displayName: 'Deploy Step'
 
-# Deploy to Production Environment (with Approval)
+# Deploy to Production Environment
 - stage: DeployToProduction
   displayName: 'Deploy to Production Environment'
   dependsOn: DeployToTest
