@@ -213,3 +213,20 @@ The pipeline includes three stages:
 
 #### Screenshots:
 ![Pipeline Execution](images/pipeline-multi-env.jpg)
+
+### **Publishing Build Artifacts**
+
+After the Build and Test Stage, the pipeline publishes artifacts for deployment and reference.
+
+1. **Updated Pipeline**:
+   - Added a `PublishBuildArtifacts` step to save build outputs.
+
+2. **Artifact Details**:
+   - **Name**: `ToDoApp-Build`
+   - **Contents**: Source code and test outputs.
+
+---
+
+### **Screenshots**:
+1. **Artifact Published**:
+   ![Artifact Screenshot](images/pipeline-artifacts.jpg)
