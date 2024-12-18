@@ -1,5 +1,22 @@
 # X00191395_CA3
 
+# Table of Contents
+
+1. [GitHub Repository Setup](#github-repository-setup)
+2. [Azure DevOps Project Setup](#azure-devops-project-setup)
+3. [Branch Management Strategy](#branch-management-strategy)
+4. [CI/CD Pipeline Implementation](#cicd-pipeline-implementation)
+5. [Multi-Environment Deployment](#multi-environment-deployment)
+6. [Security Testing Documentation](#security-testing-documentation)
+7. [Performance Testing](#performance-testing)
+8. [Selenium UAT Test Implementation](#selenium-uat-test-implementation)
+9. [Environment Management](#environment-management)
+10. [Artifacts](#artifacts)
+11. [Results](#results)
+12. [Screenshots](#screenshots)
+    - [1. Environment Management](#1-environment-management)
+    - [2. Pipeline Summary](#2-pipeline-summary)
+
 ## GitHub Repository Setup
 
 To meet submission requirements for CA3, the following steps were taken to create and configure the GitHub repository:
