@@ -1,6 +1,9 @@
 trigger:
 - development
 
+variables:
+  - group: DockerCredentials  # Link the Docker credentials variable group
+
 stages:
 # Build and Test Stage
 - stage: Build
@@ -11,17 +14,17 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - task: UseNode@1
+    - task: UsePythonVersion@0
       inputs:
-        version: '18.x'
-      displayName: 'Set Up Node.js'
+        versionSpec: '3.x'
+      displayName: 'Set Up Python 3.x'
 
     - script: |
-        npm install
-      displayName: 'Install Dependencies'
+        python -m pip install --upgrade pip
+      displayName: 'Upgrade Pip'
 
     - script: |
-        npm test
+        python -m unittest test_todo.py
       displayName: 'Run Unit Tests'
 
     # Publish Artifacts
@@ -47,33 +50,28 @@ stages:
           - script: echo "Deploying To-Do List App to Test Environment"
             displayName: 'Deploy Step'
 
-# Security Testing Stage with npm audit
+# Security Testing Stage
 - stage: SecurityTesting
   displayName: 'Run Security Testing'
   dependsOn: DeployToTest
   condition: succeeded()
   jobs:
-  - job: NpmAudit
-    displayName: 'Run npm Audit'
+  - job: NpmAuditSecurity
+    displayName: 'Run NPM Audit Security Scan'
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - task: UseNode@1
-      inputs:
-        version: '18.x'
-      displayName: 'Set Up Node.js'
-
     - script: |
         npm install
-        npm audit --audit-level=high --json > npm-audit-report.json || true
-      displayName: 'Run npm Audit'
+        npm audit --audit-level=high || echo "Security vulnerabilities found"
+      displayName: 'Run NPM Audit'
 
-    # Publish Security Report
+    # Publish NPM Audit Report
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: 'npm-audit-report.json'
-        ArtifactName: 'NpmAudit-Report'
-      displayName: 'Publish npm Audit Report'
+        PathtoPublish: 'npm-audit-report.txt'
+        ArtifactName: 'NpmAudit-SecurityReport'
+      displayName: 'Publish NPM Audit Report'
 
 # Deploy to Production Environment
 - stage: DeployToProduction
