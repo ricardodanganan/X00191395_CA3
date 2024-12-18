@@ -646,7 +646,7 @@ This screenshot highlights the published artifacts, including:
 ### Verification
 Both environments were successfully deployed as part of the pipeline.
 
-![Environment Setup](images/environment-stages.png)
+![Environment Setup](images/environment-stages.jpg)
 
 ---
 
@@ -679,10 +679,10 @@ Both environments were successfully deployed as part of the pipeline.
 ## Screenshots
 
 ### 1. Environment Management
-![Environment Setup](images/environment-stages.png)
+![Environment Setup](images/environment-stages.jpg)
 
 ### 2. Pipeline Summary
-![Pipeline Summary](images/pipeline-summary.png)
+![Pipeline Summary](images/pipeline-summary.jpg)
 
 ---
 
