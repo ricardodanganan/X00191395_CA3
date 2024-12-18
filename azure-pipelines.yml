@@ -47,10 +47,52 @@ stages:
           - script: echo "Deploying To-Do List App to Test Environment"
             displayName: 'Deploy Step'
 
+# Security Testing Stage
+- stage: SecurityTesting
+  displayName: 'Run Security Testing'
+  dependsOn: DeployToTest
+  condition: succeeded()
+  jobs:
+  - job: OWASPZAP
+    displayName: 'Run OWASP ZAP Scan'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: |
+        docker pull owasp/zap2docker-stable
+        docker run --rm -v $(System.DefaultWorkingDirectory):/zap/wrk \
+        owasp/zap2docker-stable zap-baseline.py \
+        -t http://localhost:8000 -r zap_report.html
+      displayName: 'Run OWASP ZAP Scan'
+
+    # Publish OWASP ZAP Report
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'zap_report.html'
+        ArtifactName: 'OWASPZAP-Report'
+      displayName: 'Publish OWASP ZAP Report'
+
+  - job: MicrosoftDevOpsSecurity
+    displayName: 'Run Microsoft Security DevOps Scan'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: |
+        curl -sL https://aka.ms/security-devops-setup | bash
+        msdevops scan --include-tools sast,credscan
+      displayName: 'Run Microsoft Security DevOps'
+
+    # Publish Microsoft Security Report
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'security-results'
+        ArtifactName: 'MSDevOps-SecurityReport'
+      displayName: 'Publish Microsoft Security Report'
+
 # Deploy to Production Environment
 - stage: DeployToProduction
   displayName: 'Deploy to Production Environment'
-  dependsOn: DeployToTest
+  dependsOn: SecurityTesting
   condition: succeeded()
   jobs:
   - deployment: ProdDeploy
@@ -62,4 +104,3 @@ stages:
           steps:
           - script: echo "Deploying To-Do List App to Production Environment"
             displayName: 'Deploy Step'
-
