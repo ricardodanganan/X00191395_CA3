@@ -130,6 +130,86 @@ The CI/CD pipeline was set up in Azure DevOps to automate the build and testing 
    - Triggered the pipeline manually from Azure DevOps.
    - Verified the success of each step.
 #### Screenshots:
-
 ![pipeline success](images/pipeline-success.jpg)
 
+## **Multi-Environment Deployment**
+
+### **Overview**
+The pipeline includes three stages:
+1. **Build and Test Stage**: Runs unit tests for the application.
+2. **Deploy to Test Environment**: Deploys the application to a Test environment.
+3. **Deploy to Production Environment**: Deploys to Production with an approval gate.
+
+---
+
+### **Steps to Implement Multi-Environment Deployment**
+
+1. **Updated the Pipeline Configuration**:
+   ```yaml
+   trigger:
+   - development
+
+   stages:
+   - stage: Build
+     displayName: 'Build and Test Stage'
+     jobs:
+     - job: BuildAndTest
+       displayName: 'Install and Run Tests'
+       pool:
+         vmImage: 'ubuntu-latest'
+       steps:
+       - task: UsePythonVersion@0
+         inputs:
+           versionSpec: '3.x'
+         displayName: 'Set Up Python 3.x'
+
+       - script: |
+           python -m pip install --upgrade pip
+         displayName: 'Upgrade Pip'
+
+       - script: |
+           python -m unittest test_todo.py
+         displayName: 'Run Unit Tests'
+
+   - stage: DeployToTest
+     displayName: 'Deploy to Test Environment'
+     dependsOn: Build
+     condition: succeeded()
+     jobs:
+     - deployment: TestDeploy
+       displayName: 'Deploy to Test'
+       environment: 'Test'
+       strategy:
+         runOnce:
+           deploy:
+             steps:
+             - script: echo "Deploying To-Do List App to Test Environment"
+               displayName: 'Deploy Step'
+
+   - stage: DeployToProduction
+     displayName: 'Deploy to Production Environment'
+     dependsOn: DeployToTest
+     condition: succeeded()
+     jobs:
+     - deployment: ProdDeploy
+       displayName: 'Deploy to Production'
+       environment: 'Production'
+       strategy:
+         runOnce:
+           deploy:
+             steps:
+             - script: echo "Deploying To-Do List App to Production Environment"
+               displayName: 'Deploy Step'
+
+2. **Committed and Pushed Changes**:
+   ```bash
+   git add azure-pipelines.yml
+   git commit -m "Added multi-environment deployment with approval gate"
+   git push origin development
+
+3. **Committed and Pushed Changes**:
+- Manually ran the pipeline in Azure DevOps.
+- Monitored each stage.
+
+#### Screenshots:
+![Pipeline Execution](images/pipeline-multi-env.jpg)
