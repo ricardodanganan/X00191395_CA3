@@ -574,3 +574,116 @@ This screenshot highlights the published artifacts, including:
 - **Security Audit Report**
 - **Selenium UAT Log**
 - **Build Artifacts for the ToDoApp Project**
+
+# Testing Implementation in Azure DevOps Pipeline
+
+## Pipeline Stages
+
+---
+
+### 1. **Build and Test Stage**
+- **Artifact**: `ToDoApp-Build`
+- The application is built, and unit tests are executed using Python's `unittest`.
+- **Output**: Build artifacts are published.
+
+---
+
+### 2. **Deploy to Test Environment**
+- **Job**: Deploy to Test
+- **Environment**: `Test`
+- The application is deployed to the **Test** environment.
+
+---
+
+### 3. **Run Security Testing**
+- **Tool**: NPM Audit
+- **Job**: Run NPM Audit Security Scan
+- Scans for known vulnerabilities in dependencies.
+- **Artifact**: `NPM-Security-Report`
+  - Report: `npm-audit-report.txt`
+
+---
+
+### 4. **Run Performance Testing**
+- **Tool**: Artillery
+- Simulates load testing for the application.
+- **Artifact**: `Artillery-Performance-Report`
+  - Report: `artillery-report.json`
+
+---
+
+### 5. **Run Selenium UAT Test**
+- **Tool**: Selenium WebDriver (Python)
+- Simulates a user action in the application.
+- **Artifact**: `Selenium-UAT-Report`
+  - Report: `selenium_test.log`
+
+---
+
+### 6. **Deploy to Production Environment**
+- **Job**: Deploy to Production
+- **Environment**: `Production`
+- The application is successfully deployed to the **Production** environment.
+
+---
+
+## Environment Management
+
+### Environments Setup
+1. **Test Environment**:
+   - Application deployed in the **Deploy to Test Environment** stage.
+2. **Production Environment**:
+   - Application deployed in the **Deploy to Production Environment** stage.
+
+### Stages and Jobs
+- **Deploy to Test Environment**:
+   - Job: `Deploy to Test`
+   - Environment: `Test`
+- **Deploy to Production Environment**:
+   - Job: `Deploy to Production`
+   - Environment: `Production`
+
+### Verification
+Both environments were successfully deployed as part of the pipeline.
+
+![Environment Setup](images/environment-stages.png)
+
+---
+
+## Artifacts
+
+| **Artifact Name**                | **File**                   |
+|----------------------------------|----------------------------|
+| **ToDoApp-Build**                | Application Build Files    |
+| **NPM-Security-Report**          | `npm-audit-report.txt`     |
+| **Artillery-Performance-Report** | `artillery-report.json`    |
+| **Selenium-UAT-Report**          | `selenium_test.log`        |
+
+---
+
+## Results
+
+1. **Build and Test**:
+   - All unit tests passed.
+2. **Security Testing**:
+   - NPM Audit detected vulnerabilities and generated a report.
+3. **Performance Testing**:
+   - Artillery load testing generated a performance summary.
+4. **UAT Testing**:
+   - Selenium tests executed successfully.
+5. **Deployment**:
+   - Application successfully deployed to both **Test** and **Production** environments.
+
+---
+
+## Screenshots
+
+### 1. Environment Management
+![Environment Setup](images/environment-stages.png)
+
+### 2. Pipeline Summary
+![Pipeline Summary](images/pipeline-summary.png)
+
+---
+
+
