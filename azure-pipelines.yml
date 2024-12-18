@@ -1,0 +1,27 @@
+trigger:
+- development
+
+stages:
+- stage: Build
+  displayName: 'Build and Test Stage'
+  jobs:
+  - job: BuildAndTest
+    displayName: 'Install and Run Tests'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    # Step 1: Set Up Python
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.x'
+      displayName: 'Set Up Python 3.x'
+
+    # Step 2: Install Dependencies
+    - script: |
+        python -m pip install --upgrade pip
+        displayName: 'Upgrade Pip'
+
+    # Step 3: Run Unit Tests
+    - script: |
+        python -m unittest test_todo.py
+      displayName: 'Run Unit Tests'
