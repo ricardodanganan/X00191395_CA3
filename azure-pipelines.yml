@@ -2,6 +2,7 @@ trigger:
 - development
 
 stages:
+# Build and Test Stage
 - stage: Build
   displayName: 'Build and Test Stage'
   jobs:
@@ -14,3 +15,163 @@ stages:
       inputs:
         versionSpec: '3.x'
       displayName: 'Set Up Python 3.x'
+
+    - script: |
+        python -m pip install --upgrade pip
+      displayName: 'Upgrade Pip'
+
+    - script: |
+        python -m unittest test_todo.py
+      displayName: 'Run Unit Tests'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.SourcesDirectory)'
+        ArtifactName: 'ToDoApp-Build'
+      displayName: 'Publish Build Artifacts'
+
+# Deploy to Test Environment
+- stage: DeployToTest
+  displayName: 'Deploy to Test Environment'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: TestDeploy
+    displayName: 'Deploy to Test'
+    environment: 'Test'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: echo "Deploying To-Do List App to Test Environment"
+            displayName: 'Deploy Step'
+
+# Security Testing Stage
+- stage: SecurityTesting
+  displayName: 'Run Security Testing'
+  dependsOn: DeployToTest
+  condition: succeeded()
+  jobs:
+  - job: SecurityTest
+    displayName: 'Run NPM Audit Security Scan'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '16.x'
+      displayName: 'Set Up Node.js'
+
+    - script: |
+        npm install
+        npm audit --json > npm-audit-report.txt || true
+      displayName: 'Run npm Audit'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'npm-audit-report.txt'
+        ArtifactName: 'NPM-Security-Report'
+      displayName: 'Publish NPM Audit Report'
+
+# Performance Testing Stage
+- stage: PerformanceTesting
+  displayName: 'Run Performance Testing'
+  dependsOn: SecurityTesting
+  condition: succeeded()
+  jobs:
+  - job: PerformanceTest
+    displayName: 'Run Artillery Load Test'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: |
+        npm install -g artillery
+      displayName: 'Install Artillery'
+
+    - script: |
+        echo 'config:
+          target: "http://localhost:8000"
+          phases:
+            - duration: 30
+              arrivalRate: 5
+        scenarios:
+          - flow:
+              - get:
+                  url: "/"
+        ' > artillery-config.yml
+      displayName: 'Create Artillery Config File'
+
+    - script: |
+        artillery run artillery-config.yml --output artillery-report.json
+      displayName: 'Run Artillery Load Test'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'artillery-report.json'
+        ArtifactName: 'Artillery-Performance-Report'
+      displayName: 'Publish Artillery Report'
+
+# Selenium UAT Test Stage
+- stage: SeleniumUAT
+  displayName: 'Run Selenium UAT Tests'
+  dependsOn: PerformanceTesting
+  condition: succeeded()
+  jobs:
+  - job: SeleniumTest
+    displayName: 'Execute Selenium Test Suite'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.x'
+      displayName: 'Set Up Python 3.x'
+
+    # Install Google Chrome
+    - script: |
+        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+        google-chrome --version
+      displayName: 'Install Google Chrome'
+
+    # Install ChromeDriver
+    - script: |
+        CHROME_DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE)
+        wget https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip
+        unzip chromedriver_linux64.zip
+        sudo mv chromedriver /usr/local/bin/
+        sudo chmod +x /usr/local/bin/chromedriver
+        chromedriver --version
+      displayName: 'Install ChromeDriver'
+
+    # Install Selenium
+    - script: |
+        python -m pip install selenium
+      displayName: 'Install Selenium'
+
+    # Run Selenium Test
+    - script: |
+        python selenium_automation.py > selenium_test.log || true
+      displayName: 'Run Selenium UAT Test'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'selenium_test.log'
+        ArtifactName: 'Selenium-UAT-Report'
+      displayName: 'Publish Selenium Test Report'
+
+# Deploy to Production Environment
+- stage: DeployToProduction
+  displayName: 'Deploy to Production Environment'
+  dependsOn: SeleniumUAT
+  condition: succeeded()
+  jobs:
+  - deployment: ProdDeploy
+    displayName: 'Deploy to Production'
+    environment: 'Production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: echo "Deploying To-Do List App to Production Environment"
+            displayName: 'Deploy Step'
