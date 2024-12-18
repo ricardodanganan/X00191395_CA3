@@ -29,3 +29,20 @@ To meet submission requirements, the Azure DevOps project was created and config
 
 #### Screenshots:
 ![Azure DevOps Project Screenshot](images/Azure-creation-page.jpg)
+
+## Branch Management Strategy
+
+To follow best practices in source control, the following branches were created:
+
+1. **Main Branch**:
+   - The production-ready branch that contains stable code.
+   - All changes are reviewed and tested before being merged here.
+
+2. **Development Branch**:
+   - The working branch where new features and fixes are developed.
+   - Changes are tested here before being merged into the main branch.
+
+### Steps to Create the Development Branch
+1. Checked out the main branch:
+   ```bash
+   git checkout main
