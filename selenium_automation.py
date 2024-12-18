@@ -3,8 +3,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
 
-# Initialize Chrome WebDriver
-driver = webdriver.Chrome()
+# Initialize Chrome WebDriver with headless option
+chrome_options = webdriver.ChromeOptions()
+chrome_options.add_argument("--headless")  # Run Chrome in headless mode
+chrome_options.add_argument("--disable-gpu")  # Disable GPU acceleration
+chrome_options.add_argument("--no-sandbox")  # Bypass OS security model
+chrome_options.add_argument("--disable-dev-shm-usage")  # Overcome limited resources problems
+
+driver = webdriver.Chrome(options=chrome_options)
 
 try:
     # Step 1: Open the application URL
@@ -26,3 +32,4 @@ except Exception as e:
 
 finally:
     driver.quit()  # Close the browser
+
