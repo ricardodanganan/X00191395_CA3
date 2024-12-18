@@ -51,27 +51,33 @@ stages:
             displayName: 'Deploy Step'
 
 # Security Testing Stage
+# Security Testing Stage with npm audit
 - stage: SecurityTesting
   displayName: 'Run Security Testing'
   dependsOn: DeployToTest
   condition: succeeded()
   jobs:
-  - job: NpmAuditSecurity
-    displayName: 'Run NPM Audit Security Scan'
+  - job: NpmAudit
+    displayName: 'Run npm Audit'
     pool:
       vmImage: 'ubuntu-latest'
     steps:
+    - task: UseNode@1
+      inputs:
+        version: '18.x'
+      displayName: 'Set Up Node.js'
+
     - script: |
         npm install
-        npm audit --audit-level=high || echo "Security vulnerabilities found"
-      displayName: 'Run NPM Audit'
+        npm audit --audit-level=high > npm-audit-report.txt || true
+      displayName: 'Run npm Audit'
 
-    # Publish NPM Audit Report
+    # Publish Security Report
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: 'npm-audit-report.txt'
-        ArtifactName: 'NpmAudit-SecurityReport'
-      displayName: 'Publish NPM Audit Report'
+        ArtifactName: 'NpmAudit-Report'
+      displayName: 'Publish npm Audit Report'
 
 # Deploy to Production Environment
 - stage: DeployToProduction
