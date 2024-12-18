@@ -1,0 +1,12 @@
+{
+  "name": "x00191395_ca3",
+  "version": "1.0.0",
+  "description": "To meet submission requirements for CA3, the following steps were taken to create and configure the GitHub repository:",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
