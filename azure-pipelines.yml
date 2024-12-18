@@ -84,12 +84,10 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    # Install Artillery
     - script: |
         npm install -g artillery
       displayName: 'Install Artillery'
 
-    # Write Artillery Config File
     - script: |
         echo 'config:
           target: "http://localhost:8000"
@@ -103,22 +101,50 @@ stages:
         ' > artillery-config.yml
       displayName: 'Create Artillery Config File'
 
-    # Run Artillery Test
     - script: |
         artillery run artillery-config.yml --output artillery-report.json
       displayName: 'Run Artillery Load Test'
 
-    # Publish Artillery Report
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: 'artillery-report.json'
         ArtifactName: 'Artillery-Performance-Report'
       displayName: 'Publish Artillery Report'
 
+# Selenium UAT Test Stage
+- stage: SeleniumUAT
+  displayName: 'Run Selenium UAT Tests'
+  dependsOn: PerformanceTesting
+  condition: succeeded()
+  jobs:
+  - job: SeleniumTest
+    displayName: 'Execute Selenium Test Suite'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.x'
+      displayName: 'Set Up Python 3.x'
+
+    - script: |
+        python -m pip install selenium
+      displayName: 'Install Selenium'
+
+    - script: |
+        python selenium_automation.py
+      displayName: 'Run Selenium UAT Test'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'selenium_test.log'
+        ArtifactName: 'Selenium-UAT-Report'
+      displayName: 'Publish Selenium Test Report'
+
 # Deploy to Production Environment
 - stage: DeployToProduction
   displayName: 'Deploy to Production Environment'
-  dependsOn: PerformanceTesting
+  dependsOn: SeleniumUAT
   condition: succeeded()
   jobs:
   - deployment: ProdDeploy
@@ -130,4 +156,3 @@ stages:
           steps:
           - script: echo "Deploying To-Do List App to Production Environment"
             displayName: 'Deploy Step'
-
