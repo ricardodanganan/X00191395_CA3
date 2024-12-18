@@ -19,7 +19,7 @@ stages:
     # Step 2: Install Dependencies
     - script: |
         python -m pip install --upgrade pip
-        displayName: 'Upgrade Pip'
+      displayName: 'Upgrade Pip'
 
     # Step 3: Run Unit Tests
     - script: |
