@@ -1,6 +1,9 @@
 trigger:
 - development
 
+variables:
+  - group: DockerCredentials  # Link the Docker credentials variable group
+
 stages:
 # Build and Test Stage
 - stage: Build
@@ -59,6 +62,7 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - script: |
+        echo $(DOCKER_PASSWORD) | docker login -u $(DOCKER_USERNAME) --password-stdin
         docker pull owasp/zap2docker-weekly
         docker run --rm -v $(System.DefaultWorkingDirectory):/zap/wrk \
         owasp/zap2docker-weekly zap-baseline.py \
