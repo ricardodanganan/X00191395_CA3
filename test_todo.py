@@ -6,7 +6,7 @@
 
 # Import the unittest module
 import unittest
-from X00191395_CA3.todo import tasks, add_task, view_tasks, mark_task, delete_task
+from todo import tasks, add_task, view_tasks, mark_task, delete_task
 
 # Create a test class that inherits from unittest.TestCase
 class TestTodoApp(unittest.TestCase):
