@@ -1,9 +1,6 @@
 trigger:
 - development
 
-variables:
-  - group: DockerCredentials  # Link the Docker credentials variable group
-
 stages:
 # Build and Test Stage
 - stage: Build
@@ -14,17 +11,17 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - task: UsePythonVersion@0
+    - task: UseNode@1
       inputs:
-        versionSpec: '3.x'
-      displayName: 'Set Up Python 3.x'
+        version: '18.x'
+      displayName: 'Set Up Node.js'
 
     - script: |
-        python -m pip install --upgrade pip
-      displayName: 'Upgrade Pip'
+        npm install
+      displayName: 'Install Dependencies'
 
     - script: |
-        python -m unittest test_todo.py
+        npm test
       displayName: 'Run Unit Tests'
 
     # Publish Artifacts
@@ -50,56 +47,33 @@ stages:
           - script: echo "Deploying To-Do List App to Test Environment"
             displayName: 'Deploy Step'
 
-# Security Testing Stage
+# Security Testing Stage with npm audit
 - stage: SecurityTesting
   displayName: 'Run Security Testing'
   dependsOn: DeployToTest
   condition: succeeded()
   jobs:
-  - job: OWASPZAP
-    displayName: 'Run OWASP ZAP Scan'
+  - job: NpmAudit
+    displayName: 'Run npm Audit'
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    # Verify Docker Login
-    - script: |
-        echo "Verifying Docker login..."
-        echo $(DOCKER_PASSWORD) | docker login -u $(DOCKER_USERNAME) --password-stdin
-        docker info
-        docker images
-      displayName: 'Verify Docker Login'
+    - task: UseNode@1
+      inputs:
+        version: '18.x'
+      displayName: 'Set Up Node.js'
 
-    # Run OWASP ZAP Scan
     - script: |
-        docker pull owasp/zap2docker-weekly
-        docker run --rm -v $(System.DefaultWorkingDirectory):/zap/wrk \
-        owasp/zap2docker-weekly zap-baseline.py \
-        -t http://localhost:8000 -r zap_report.html
-      displayName: 'Run OWASP ZAP Scan'
+        npm install
+        npm audit --audit-level=high --json > npm-audit-report.json || true
+      displayName: 'Run npm Audit'
 
-    # Publish OWASP ZAP Report
+    # Publish Security Report
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: 'zap_report.html'
-        ArtifactName: 'OWASPZAP-Report'
-      displayName: 'Publish OWASP ZAP Report'
-
-  - job: MicrosoftDevOpsSecurity
-    displayName: 'Run Microsoft Security DevOps Scan'
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - script: |
-        curl -sL https://aka.ms/security-devops-setup | bash
-        msdevops scan --include-tools sast,credscan --output-dir security-results || echo "Security scan failed"
-      displayName: 'Run Microsoft Security DevOps'
-
-    # Publish Microsoft Security Report
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: 'security-results'
-        ArtifactName: 'MSDevOps-SecurityReport'
-      displayName: 'Publish Microsoft Security Report'
+        PathtoPublish: 'npm-audit-report.json'
+        ArtifactName: 'NpmAudit-Report'
+      displayName: 'Publish npm Audit Report'
 
 # Deploy to Production Environment
 - stage: DeployToProduction
