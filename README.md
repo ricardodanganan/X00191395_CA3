@@ -302,35 +302,125 @@ The security testing stage was integrated after deploying to the **Test Environm
             ArtifactName: "NPM-Audit-Report"
           displayName: "Publish NPM Audit Report"
 ```
+
 ### How It Works
 
 1. **Run NPM Audit**:
+
 - Installs project dependencies using npm install.
 - Executes npm audit with --audit-level=low to scan for vulnerabilities.
 - Outputs the audit report in JSON format and saves it as npm-audit-report.txt.
 
 2. **Publish the Report**:
+
 - The npm audit report is published as a build artifact named NPM-Audit-Report.
 - This artifact allows easy review of vulnerabilities.
 
 ## Pipeline Results
 
 1. **Successful Execution**:
+
 - The pipeline successfully runs npm audit and generates a vulnerability report.
 - The report is published as part of the build artifacts.
 
 2. **Pipeline Summary**:
+
 - The SecurityTesting stage runs after the "Deploy to Test" stage.
 - Artifacts such as the npm-audit-report.txt are stored and accessible for review.
 
 ## Artifacts and Reports
 
 1. **NPM-Audit-Report**:
+
 - Contains the output from npm audit.
 - Stored as a text file (npm-audit-report.txt) in the Azure DevOps pipeline.
 
 ### **Screenshots**:
- ![Security Success](images/pipeline-security-success.jpg)
 
- ### **Screenshots**:
- ![NPM Audit report](images/NPM-Audit-report.jpg)
+![Security Success](images/pipeline-security-success.jpg)
+
+### **Screenshots**:
+
+![NPM Audit report](images/NPM-Audit-report.jpg)
+
+# Testing Implementation in Azure DevOps Pipeline
+
+## Overview
+
+This project integrates **Performance Testing** into the CI/CD pipeline using **Azure DevOps**. The testing stage ensures application performance is measured under simulated load before deployment.
+
+---
+
+## Pipeline Stages
+
+### 1. **Build and Test Stage**
+
+- **Objective**: Install dependencies and run unit tests.
+- **Tools**: Python Unit Test Framework
+- **Steps**:
+  - Install Python 3.x.
+  - Upgrade pip.
+  - Execute unit tests (`python -m unittest`).
+
+---
+
+### 2. **Deploy to Test Environment**
+
+- **Objective**: Deploy the application to the Test environment for further testing.
+- **Steps**:
+  - Simple deployment confirmation using an echo script.
+
+---
+
+### 3. **Performance Testing**
+
+- **Objective**: Measure application performance under simulated load.
+- **Tools**: **Artillery**
+- **Steps**:
+  - Install Artillery CLI.
+  - Run Artillery load test on the application.
+  - Save the test output report as `performance-report.txt`.
+  - Publish the report as a pipeline artifact.
+
+**Pipeline Code**:
+
+```yaml
+- stage: PerformanceTesting
+  displayName: "Run Performance Testing"
+  dependsOn: DeployToTest
+  condition: succeeded()
+  jobs:
+    - job: ArtilleryTest
+      displayName: "Run Artillery Load Test"
+      pool:
+        vmImage: "ubuntu-latest"
+      steps:
+        - script: |
+            npm install -g artillery
+            artillery quick --count 10 -n 20 http://localhost:8000 > performance-report.txt
+          displayName: "Run Artillery Performance Test"
+        - task: PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: "performance-report.txt"
+            ArtifactName: "PerformanceTest-Report"
+          displayName: "Publish Performance Test Report"
+```
+
+### 4. **Deploy to Production Environment**  
+
+- Deploy the application to the Production environment.
+
+### 5. **Artifacts** 
+
+- PerformanceTest-Report: Contains the output of Artillery load testing.
+
+### 6. **Results** 
+
+- Artillery Load Test: Provides a performance summary, including.
+- Total requests sent.
+- Response times (min, max, average).
+- Errors encountered (if any).
+
+### **Screenshots**:
+
+![Performance testing](images/Performance-settings.jpg)
