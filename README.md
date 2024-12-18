@@ -406,15 +406,15 @@ This project integrates **Performance Testing** into the CI/CD pipeline using **
           displayName: "Publish Performance Test Report"
 ```
 
-### 4. **Deploy to Production Environment**  
+### 4. **Deploy to Production Environment**
 
 - Deploy the application to the Production environment.
 
-### 5. **Artifacts** 
+### 5. **Artifacts**
 
 - PerformanceTest-Report: Contains the output of Artillery load testing.
 
-### 6. **Results** 
+### 6. **Results**
 
 - Artillery Load Test: Provides a performance summary, including.
 - Total requests sent.
@@ -424,3 +424,117 @@ This project integrates **Performance Testing** into the CI/CD pipeline using **
 ### **Screenshots**:
 
 ![Performance testing](images/Performance-settings.jpg)
+
+# Selenium UAT Test Implementation in Azure DevOps Pipeline
+
+## **1. Overview**
+
+The Selenium UAT (User Acceptance Testing) implementation ensures the web application's functionality meets requirements by simulating user actions and validating results.
+
+---
+
+## **2. Steps to Implement Selenium UAT Testing**
+
+### **2.1 Selenium Script**
+
+The Selenium script automates browser testing. Below is an example of a Selenium script written in Python:
+
+**File:** `selenium_automation.py`
+
+```python
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import time
+
+# Initialize Chrome WebDriver
+driver = webdriver.Chrome()
+
+try:
+    # Step 1: Open the application URL
+    driver.get("http://localhost:8000")  # Replace with your test environment URL
+    time.sleep(2)  # Allow time for the page to load
+
+    # Step 2: Simulate user action (search or input field)
+    search_box = driver.find_element(By.NAME, "q")  # Replace 'q' with your input field name
+    search_box.send_keys("Test Data")
+    search_box.send_keys(Keys.RETURN)
+    time.sleep(2)
+
+    # Step 3: Validate results
+    assert "No results found." not in driver.page_source
+    print("Test Passed: Search functionality works!")
+
+except Exception as e:
+    print(f"Test Failed: {str(e)}")
+
+finally:
+    driver.quit()  # Close the browser
+
+```
+
+### **2.2 Azure Pipeline Configuration**
+
+The Selenium UAT Test stage is added to the Azure Pipeline YAML file. Below is the updated configuration:
+
+**File:** `azure-pipelines.yml`
+
+```yml
+# Selenium UAT Test Stage
+- stage: SeleniumUAT
+  displayName: "Run Selenium UAT Tests"
+  dependsOn: PerformanceTesting
+  condition: succeeded()
+  jobs:
+    - job: SeleniumTest
+      displayName: "Execute Selenium Test Suite"
+      pool:
+        vmImage: "ubuntu-latest"
+      steps:
+        # Set Up Python
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: "3.x"
+          displayName: "Set Up Python 3.x"
+
+        # Install Dependencies
+        - script: |
+            python -m pip install selenium
+            sudo apt-get update
+            sudo apt-get install -y google-chrome-stable
+          displayName: "Install Selenium and Chrome"
+
+        # Run Selenium Tests
+        - script: |
+            python selenium_automation.py > selenium_test.log || true
+          displayName: "Run Selenium UAT Test"
+
+        # Publish Selenium Test Report
+        - task: PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: "selenium_test.log"
+            ArtifactName: "Selenium-UAT-Report"
+          displayName: "Publish Selenium Test Report"
+```
+### 3. **Pipeline Stages**
+
+- Build and Test Stage: Runs unit tests for the application.
+- Deploy to Test Environment: Deploys the application to a test environment.
+- Run Security Testing: Conducts security scans using NPM Audit.
+- Run Performance Testing: Executes performance testing using Artillery.
+- Run Selenium UAT Tests: Runs Selenium tests to validate UI functionality.
+
+### 4. **Artifacts**
+
+- Selenium-UAT-Report: Contains the Selenium test logs output.
+- View and download the selenium_test.log file in Azure DevOps artifacts under the Selenium UAT Test stage.
+
+### 5. **Results**
+
+- Correct loading of the target application URL.
+- User input interactions such as search or form submission.
+- Expected behavior and results on the web page
+
+### **Screenshots**:
+
+![Selenium Testing](images/Selenium-testing.jpg)
