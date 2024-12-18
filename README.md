@@ -99,7 +99,6 @@ The CI/CD pipeline was set up in Azure DevOps to automate the build and testing 
    ```bash
    touch azure-pipelines.yml
    trigger:
-   ```
 - development
 stages:
 - stage: Build
@@ -120,6 +119,7 @@ stages:
     - script: |
       python -m unittest test_todo.py
       displayName: 'Run Unit Tests'
+      ```
 
 3. **Committed and Pushed the Pipeline to GitHub**:
    ```bash
