@@ -57,3 +57,27 @@ To follow best practices in source control, the following branches were created:
 
 #### Screenshots:
 ![Github Development Branch](images/Github-development-branch.jpg)
+
+## CI/CD Pipeline Implementation
+
+### Multi-Stage Pipeline
+The CI/CD pipeline for this project was implemented using Azure DevOps. The pipeline is configured as follows:
+
+1. **Build Stage**:
+   - Installs dependencies and builds the project.
+   - Publishes build artifacts for deployment.
+
+2. **Deployment Stages**:
+   - **Test Environment**:
+     - Deploys the application to a test environment for validation.
+   - **Production Environment**:
+     - Deploys the application to the production environment after manual approval.
+
+### Pipeline Configuration
+The pipeline is defined in a YAML file (`azure-pipelines.yml`) with the following stages:
+- Build
+- Deploy to Test
+- Deploy to Production
+
+### Approval Gates
+- Manual approval is required before deployment to the production environment.
