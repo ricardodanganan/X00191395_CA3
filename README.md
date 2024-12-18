@@ -46,3 +46,14 @@ To follow best practices in source control, the following branches were created:
 1. Checked out the main branch:
    ```bash
    git checkout main
+
+2. Created and switched to the development branch:
+   ```bash
+   git checkout -b development
+
+3. Pushed the branch to GitHub:
+   ```bash
+   git push -u origin development
+
+#### Screenshots:
+![Github Development Branch](images/Github-development-branch.jpg)
