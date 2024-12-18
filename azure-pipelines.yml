@@ -1,9 +1,6 @@
 trigger:
 - development
 
-variables:
-  - group: DockerCredentials  # Link the Docker credentials variable group
-
 stages:
 # Build and Test Stage
 - stage: Build
@@ -27,7 +24,6 @@ stages:
         python -m unittest test_todo.py
       displayName: 'Run Unit Tests'
 
-    # Publish Artifacts
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(Build.SourcesDirectory)'
@@ -51,38 +47,78 @@ stages:
             displayName: 'Deploy Step'
 
 # Security Testing Stage
-# Security Testing Stage with npm audit
 - stage: SecurityTesting
   displayName: 'Run Security Testing'
   dependsOn: DeployToTest
   condition: succeeded()
   jobs:
-  - job: NpmAudit
-    displayName: 'Run npm Audit'
+  - job: SecurityTest
+    displayName: 'Run NPM Audit Security Scan'
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - task: UseNode@1
+    - task: NodeTool@0
       inputs:
-        version: '18.x'
+        versionSpec: '16.x'
       displayName: 'Set Up Node.js'
 
     - script: |
         npm install
-        npm audit --audit-level=high > npm-audit-report.txt || true
+        npm audit --json > npm-audit-report.txt || true
       displayName: 'Run npm Audit'
 
-    # Publish Security Report
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: 'npm-audit-report.txt'
-        ArtifactName: 'NpmAudit-Report'
-      displayName: 'Publish npm Audit Report'
+        ArtifactName: 'NPM-Security-Report'
+      displayName: 'Publish NPM Audit Report'
+
+# Performance Testing Stage
+- stage: PerformanceTesting
+  displayName: 'Run Performance Testing'
+  dependsOn: SecurityTesting
+  condition: succeeded()
+  jobs:
+  - job: PerformanceTest
+    displayName: 'Run Artillery Load Test'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    # Install Artillery
+    - script: |
+        npm install -g artillery
+      displayName: 'Install Artillery'
+
+    # Write Artillery Config File
+    - script: |
+        echo 'config:
+          target: "http://localhost:8000"
+          phases:
+            - duration: 30
+              arrivalRate: 5
+        scenarios:
+          - flow:
+              - get:
+                  url: "/"
+        ' > artillery-config.yml
+      displayName: 'Create Artillery Config File'
+
+    # Run Artillery Test
+    - script: |
+        artillery run artillery-config.yml --output artillery-report.json
+      displayName: 'Run Artillery Load Test'
+
+    # Publish Artillery Report
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'artillery-report.json'
+        ArtifactName: 'Artillery-Performance-Report'
+      displayName: 'Publish Artillery Report'
 
 # Deploy to Production Environment
 - stage: DeployToProduction
   displayName: 'Deploy to Production Environment'
-  dependsOn: SecurityTesting
+  dependsOn: PerformanceTesting
   condition: succeeded()
   jobs:
   - deployment: ProdDeploy
