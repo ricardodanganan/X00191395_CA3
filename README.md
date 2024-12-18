@@ -538,3 +538,39 @@ The Selenium UAT Test stage is added to the Azure Pipeline YAML file. Below is t
 ### **Screenshots**:
 
 ![Selenium Testing](images/Selenium-testing.jpg)
+
+## Artifacts Report Overview
+
+The following artifacts were successfully generated and published during the Azure DevOps pipeline execution:
+
+### **1. Artillery Performance Report**
+- **File:** `artillery-report.json`
+- **Size:** 3 KB
+- **Details:** Contains results of Artillery load testing, including performance metrics and response times.
+
+### **2. NPM Security Report**
+- **File:** `npm-audit-report.txt`
+- **Size:** 358 B
+- **Details:** Contains the output of the `npm audit` security scan, highlighting potential vulnerabilities in project dependencies.
+
+### **3. Selenium UAT Report**
+- **File:** `selenium_test.log`
+- **Size:** 358 B
+- **Details:** Log file capturing the results of the Selenium UAT test execution, including any assertions or errors.
+
+### **4. ToDoApp Build**
+- **Contents:**
+  - Source code files: `azure-pipelines.yml`, `selenium_automation.py`, `test_todo.py`, `todo.py`
+  - Project dependencies: `package.json`
+  - Output artifacts and cache files: `__pycache__`
+- **Size:** 2 MB
+
+---
+### **Screenshot Reference**
+![Artifacts Screenshot](images/Artifatcts.jpg)
+
+This screenshot highlights the published artifacts, including:
+- **Performance Test Results**
+- **Security Audit Report**
+- **Selenium UAT Log**
+- **Build Artifacts for the ToDoApp Project**
