@@ -4,6 +4,8 @@
 # Created on: 20/11/2024
 # This file contains the unit tests for the todo app using the unittest module in Python.
 
+# CA evaluation. 
+
 # Import the unittest module
 import unittest
 from todo import tasks, add_task, view_tasks, mark_task, delete_task
